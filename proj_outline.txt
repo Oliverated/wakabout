@@ -1,0 +1,110 @@
+WAKABOUT BLOG WEBSITE PROJECT OUTLINE
+
+Project Title: Design and Development of a Blog Website
+By
+Ovbiebo O. Oliver
+Full Stack Web Developer
+
+Project Overview
+This project involves the development of a modern, responsive blog website that not only publishes articles but also showcases books and promotes tourist events. The platform will serve as a multi-purpose content hub, combining blogging, digital catalog display, and event promotion.
+Project Objectives
+
+- Build a professional and responsive blog platform
+- content publishing and audience engagement
+- Showcase books directly from the homepage
+- Promote tourist and local events
+- Provide scalable structure for future expansion
+
+Website Structure
+1. Home Page
+The Home Page will act as the central hub, combining multiple content types.
+Features:
+Hero section (intro/featured content)
+Latest blog posts preview
+Books showcase section (featured books)
+Tourist events highlight section
+Call-to-action sections
+Footer with links and social media
+
+2. Blog Page
+Displays all blog posts.
+Features:
+Blog listing (grid or list view)
+Categories and tags
+Search functionality
+Pagination
+
+3. Books Page 
+A dedicated page for displaying books.
+Features:
+List or grid of books
+Book cover images
+Book descriptions
+Author name
+Optional “Read more” or “Buy” link
+Categories (e.g., fiction, tech, business)
+
+3i. Tourist Events Page
+A dedicated page for showcasing events and attractions.
+Features:
+List of upcoming events
+Event images and descriptions
+Date, time, and location
+Highlight of popular tourist attractions
+Optional booking or external links
+
+4. About Page
+Information about the blog and its purpose.
+Features:
+Background story
+Mission and vision
+Brand identity
+
+4i. Author Bio Page
+Details about the blog owner or contributors.
+Features:
+Profile information
+Skills and expertise
+Social media links
+Personal message
+
+5. Contact Page
+Allows users to reach out.
+Features:
+Contact form
+Email and phone
+Social links
+
+
+Special Functional Sections
+Books Display Integration
+Featured books will appear on the homepage
+Admin can easily update or add new books
+Can be expanded into an e-commerce feature in the future
+Tourist Events Integration
+Events preview on homepage
+Dedicated page for full event listings
+Supports future upgrades like ticket booking or registration
+
+Technical Features
+Fully responsive design
+SEO optimization
+Fast performance
+Dynamic content management
+Secure forms
+
+Technology Stack
+Frontend: HTML, CSS, JavaScript
+Backend: PHP 
+Database: MySQL
+Project Duration: 10-13 days from now
+
+Deliverables
+Complete blog website
+Books and Events pages
+Responsive UI
+Deployment support
+
+
+What you would expect:
+This project delivers more than just a blog—it creates a content ecosystem that combines articles, books, and tourism/event promotion into one powerful platform.

@@ -111,6 +111,21 @@
   padding-bottom: 10px;
 }
 
+.post-categ div{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+ .post-categ a{
+background-color: var(--accent-lit);
+color: var(--accent);
+padding: 3px 10px;
+padding-bottom: 5px;
+font-size: 15px;
+border-radius: 5px;
+}
+
 .side-post {
   display: flex;
   gap: 15px;
