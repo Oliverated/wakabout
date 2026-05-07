@@ -1,31 +1,15 @@
 <?php
-require_once __DIR__ . '/config.php';
+// Load the Env class and parse the .env file (idempotent — safe to call multiple times)
+require_once __DIR__ . '/../env/env.php';
+Env::load(__DIR__ . '/../env/.env');
 
-try {
-    $pdo = new PDO("sqlite:" . DB_PATH, null, null, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ]);
+$conn = new mysqli(
+    Env::get('DB_HOST', 'localhost'),
+    Env::get('DB_USER', 'root'),
+    Env::get('DB_PASS', ''),
+    Env::get('DB_NAME', 'wakabout')
+);
 
-    // Enable WAL mode for better concurrency
-    $pdo->exec("PRAGMA journal_mode=WAL");
-
-    // Create table if it doesn't exist
-    $pdo->exec("
-        CREATE TABLE IF NOT EXISTS posts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            slug TEXT NOT NULL UNIQUE,
-            category TEXT DEFAULT 'General',
-            author TEXT DEFAULT 'Wakabout Team',
-            excerpt TEXT,
-            body TEXT NOT NULL,
-            cover_image TEXT DEFAULT NULL,
-            published_at DATETIME DEFAULT (datetime('now','localtime')),
-            created_at DATETIME DEFAULT (datetime('now','localtime')),
-            updated_at DATETIME DEFAULT (datetime('now','localtime'))
-        )
-    ");
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }

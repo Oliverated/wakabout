@@ -1,0 +1,125 @@
+/* auth.css */
+@import url('../assets/required.css');
+
+body {
+  background-color: var(--card-bg, #fcfcfd);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.auth-container {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.auth-brand {
+  margin-bottom: 30px;
+}
+
+.auth-brand h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 28px;
+  color: var(--secondary, #000);
+  margin: 0;
+}
+
+.auth-brand span {
+  color: var(--accent, #ff141493);
+}
+
+.auth-form-title {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.auth-input-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.auth-input-group label {
+  display: block;
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.auth-input-group input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.auth-input-group input:focus {
+  outline: none;
+  border-color: var(--accent, #ff141493);
+  box-shadow: 0 0 0 3px rgba(255, 20, 20, 0.1);
+}
+
+.auth-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--accent, #ff141493);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-top: 10px;
+}
+
+.auth-btn:hover {
+  opacity: 0.9;
+}
+
+.auth-links {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #666;
+}
+
+.auth-links a {
+  color: var(--accent, #ff141493);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-links a:hover {
+  text-decoration: underline;
+}
+
+.auth-alert {
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.auth-alert.error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #f87171;
+}
+
+.auth-alert.success {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #4ade80;
+}

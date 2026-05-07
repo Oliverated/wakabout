@@ -55,8 +55,8 @@
 .post-image {
   width: 100%;
   height: auto;
-  max-height: 60vh;
-  object-fit: cover;
+  max-height: 80vh;
+  object-fit: auto;
   border-radius: 12px;
   margin-bottom: 30px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -82,7 +82,6 @@
   margin-bottom: 20px;
   line-height: 1.8;
   font-size: 18px;
-  color: #333;
 }
 
 /* SIDEBAR */
@@ -111,19 +110,19 @@
   padding-bottom: 10px;
 }
 
-.post-categ div{
+.post-categ div {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
 }
 
- .post-categ a{
-background-color: var(--accent-lit);
-color: var(--accent);
-padding: 3px 10px;
-padding-bottom: 5px;
-font-size: 15px;
-border-radius: 5px;
+.post-categ a {
+  background-color: var(--accent-lit);
+  color: var(--accent);
+  padding: 3px 10px;
+  padding-bottom: 5px;
+  font-size: 15px;
+  border-radius: 5px;
 }
 
 .side-post {
@@ -164,6 +163,52 @@ border-radius: 5px;
   color: var(--accent);
 }
 
+/* engagement - likes and comments */
+.post-engagement{
+  display: flex;
+ margin-top: 40px;
+border-top: 1px solid #ddd;
+padding-top: 20px;
+}
+
+.engage-form{
+  display: flex;
+  border: 2px solid #f9a5a5a7;
+  border-radius: 15px;
+  align-content: center;
+  align-items: center;
+  width: 50vw;
+  height: 10vh;
+  padding-right: 5px;
+}
+
+.engage-form textarea{
+  width: 100%;
+  height: 8vh;
+  resize: none;
+  background-color: transparent;
+  padding-left: 8px;
+  border: none;
+  outline: none;
+  align-content: center;
+}
+
+#likeBtn{
+  align-items: center;
+background-color: transparent;
+}
+
+.like-icon{
+  width: 60px;
+}
+
+.comment-icon{
+  width: 50px;
+}
+
+
+
+
 @media (max-width: 768px) {
 
   .post-container {
@@ -174,12 +219,12 @@ border-radius: 5px;
   .post-title {
     font-size: 28px;
   }
-  
+
   .post-sidebar {
     position: static;
   }
 
   .post-sidebar {
-  width: 100%;
+    width: 100%;
   }
 }
