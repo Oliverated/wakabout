@@ -393,6 +393,94 @@ a {
   border: 1px solid var(--dash-border);
 }
 
+/* ══════════════ POST SUMMARY STATS ══════════════ */
+.post-summary-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.pss-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  background: var(--dash-surface);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.pss-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--dash-radius) var(--dash-radius) 0 0;
+}
+
+.pss-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+}
+
+/* colour theming per card */
+.pss-posts::before  { background: var(--dash-accent); }
+.pss-views::before  { background: var(--dash-blue); }
+.pss-likes::before  { background: #ec4899; }
+
+.pss-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pss-icon svg { width: 22px; height: 22px; }
+
+.pss-posts .pss-icon { background: var(--dash-accent-glow);        color: var(--dash-accent); }
+.pss-views .pss-icon { background: rgba(59,130,246,0.14);          color: var(--dash-blue); }
+.pss-likes .pss-icon { background: rgba(236,72,153,0.14);          color: #ec4899; }
+
+.pss-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pss-value {
+  font-family: var(--ff-heading);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.pss-posts .pss-value { color: var(--dash-accent); }
+.pss-views .pss-value { color: var(--dash-blue); }
+.pss-likes .pss-value { color: #ec4899; }
+
+.pss-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dash-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+@media (max-width: 700px) {
+  .post-summary-stats {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
 /* ══════════════ TABLE SCROLL WRAPPER ══════════════ */
 .table-scroll-wrap {
   width: 100%;
@@ -860,6 +948,14 @@ gap: 50px;
   .dash-form-row {
     grid-template-columns: 1fr;
   }
+
+  .dash-form-group-flex{
+  display: block;
+  /* grid-template-columns: auto; */
+width: 90%;
+gap: 50px;
+}
+
 }
 
 @media (max-width: 480px) {

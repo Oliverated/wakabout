@@ -4,9 +4,10 @@
 $activePage = $activePage ?? '';
 ?>
   <!-- Sidebar -->
+   
   <aside class="dash-sidebar" id="sidebar">
     <div class="dash-sidebar-brand">
-      <h2>Waka<span>bout</span></h2>
+      <h2>Waka<span>About</span></h2>
       <p>Admin Panel</p>
     </div>
     <ul class="dash-nav">

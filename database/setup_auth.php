@@ -4,10 +4,13 @@ require_once __DIR__ . '/../includes/db.php';
 $queries = [
   "CREATE TABLE IF NOT EXISTS users (
       id INT AUTO_INCREMENT PRIMARY KEY,
-      username VARCHAR(100) NOT NULL UNIQUE,
+      first_name VARCHAR(100) DEFAULT NULL,
+      last_name VARCHAR(100) NOT NULL  ,
+      username VARCHAR(100) DEFAULT NULL UNIQUE,
       email VARCHAR(200) NOT NULL UNIQUE,
       password_hash VARCHAR(255) NOT NULL,
       reset_token VARCHAR(255) DEFAULT NULL,
+      reset_token_expires DATETIME DEFAULT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )",
   "CREATE TABLE IF NOT EXISTS post_comments (

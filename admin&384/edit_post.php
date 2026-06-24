@@ -6,7 +6,8 @@ $success = '';
 $error   = '';
 
 // Get existing post
-$id = intval($_GET['id'] ?? 0);
+// Get post id — from URL (?id=N) on GET, or hidden field on POST
+$id = intval($_GET['id'] ?? $_POST['id'] ?? 0);
 $post = null;
 
 if ($id > 0) {
@@ -56,7 +57,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if (empty($title) || empty($body)) {
+    // Quill blank state is '<p><br></p>' — strip tags to check actual content
+    $bodyStripped = trim(strip_tags($body));
+    if (empty($title) || empty($bodyStripped)) {
         $error = 'Title and Body are required.';
     }
 
@@ -99,39 +102,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Post — Wakabout Admin</title>
   <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="/assets/required.css">
 </head>
 <body>
 
-  <!-- Sidebar -->
-  <aside class="dash-sidebar" id="sidebar">
-    <div class="dash-sidebar-brand">
-      <h2>Waka<span>bout</span></h2>
-      <p>Admin Panel</p>
-    </div>
-    <ul class="dash-nav">
-      <li><a href="dashboard.php">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25a2.25 2.25 0 0 1-2.25-2.25v-2.25Z"/></svg>
-        Dashboard
-      </a></li>
-      <li><a href="create_post.php">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-        Create Post
-      </a></li>
-      <li><a href="manage_posts.php">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
-        Manage Posts
-      </a></li>
-    </ul>
-    <div class="dash-nav-divider"></div>
-    <div class="dash-sidebar-footer">
-      <a href="../index.html">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3"/></svg>
-        Back to Website
-      </a>
-    </div>
-  </aside>
-
-  <div class="dash-overlay" id="overlay"></div>
+<?php $activePage = 'manage_posts'; include 'sidebar.php'; ?>
 
   <main class="dash-main">
     <div class="dash-topbar">
@@ -154,7 +129,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h2>Editing: <?= htmlspecialchars($post['title']) ?></h2>
       </div>
       <div style="padding: 24px;">
-        <form method="POST" enctype="multipart/form-data" class="dash-form-container">
+        <form method="POST" action="edit_post.php?id=<?= $id ?>" enctype="multipart/form-data" class="dash-form-container">
+          <!-- Keep id on POST in case action URL is stripped -->
+          <input type="hidden" name="id" value="<?= $id ?>">
           <div class="dash-form-group">
             <label for="title">Post Title *</label>
             <input type="text" id="title" name="title" placeholder="Enter post title..." required
@@ -199,7 +176,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </div>
 
           <div class="dash-form-group">
-            <label for="cover_image">Cover Image <?= $post['cover_image'] ? '(current: ' . htmlspecialchars(basename($post['cover_image'])) . ')' : '' ?></label>
+            <label for="cover_image">Cover Image</label>
+            <?php if (!empty($post['cover_image'])): ?>
+              <div style="margin-bottom:10px;">
+                <img src="../<?= htmlspecialchars($post['cover_image']) ?>" alt="Current cover"
+                     style="max-height:140px;border-radius:8px;border:1px solid var(--border,#333);object-fit:cover;">
+                <p style="font-size:12px;opacity:.6;margin-top:4px;">Current: <?= htmlspecialchars(basename($post['cover_image'])) ?> — Upload a new file to replace it.</p>
+              </div>
+            <?php else: ?>
+              <p style="font-size:12px;opacity:.6;margin-bottom:8px;">No cover image — upload one below.</p>
+            <?php endif; ?>
             <input type="file" id="cover_image" name="cover_image" accept="image/*">
           </div>
 
@@ -210,10 +196,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
           <div class="dash-form-group">
             <label>Post Body *</label>
-            <!-- Hidden textarea synced on submit -->
-            <textarea id="body" name="body" style="display:none" required><?= htmlspecialchars($post['body']) ?></textarea>
+            <!-- Hidden textarea — value set by JS before submit, NOT pre-filled via PHP to avoid double-encoding -->
+            <textarea id="body" name="body" style="display:none"></textarea>
             <!-- Quill editor container -->
             <div id="quill-editor"></div>
+            <span id="body-error" style="display:none;color:#f87171;font-size:13px;margin-top:4px;">Post body cannot be empty.</span>
           </div>
 
           <button type="submit" class="dash-submit-btn">Update Post</button>
@@ -290,6 +277,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       if (cb.checked) cb.closest('.cat-tag').querySelector('span').style.fontWeight = '600';
     });
 
+    // ── Fix Quill link sanitizer (must be BEFORE Quill init) ──
+    const Link = Quill.import('formats/link');
+    Link.sanitize = function(url) {
+      if (!url.startsWith('http://') && !url.startsWith('https://') &&
+          !url.startsWith('mailto:') && !url.startsWith('/')) {
+        return 'https://' + url;
+      }
+      return url;
+    };
+    Quill.register(Link, true);
+
     // ── Quill WYSIWYG ──────────────────────────────────────────────
     const quill = new Quill('#quill-editor', {
       theme: 'snow',
@@ -335,15 +333,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       }
     });
 
-    // Pre-fill editor with existing post body
-    const bodyTA = document.getElementById('body');
-    if (bodyTA.value.trim()) {
-      quill.root.innerHTML = bodyTA.value;
+    // ── Pre-fill Quill with existing post body ─────────────────
+    const existingBody = <?= json_encode($post['body'] ?? '') ?>;
+    if (existingBody && existingBody.replace(/<[^>]*>/g, '').trim()) {
+      quill.root.innerHTML = existingBody;
     }
 
-    // Sync Quill HTML → hidden textarea on submit
-    document.querySelector('form').addEventListener('submit', () => {
-      bodyTA.value = quill.root.innerHTML;
+    const bodyTA    = document.getElementById('body');
+    const bodyError = document.getElementById('body-error');
+
+    // Removed Link.sanitize here — moved before Quill init above
+
+    // Sync Quill HTML → hidden textarea; validate before submit
+    document.querySelector('form').addEventListener('submit', function(e) {
+      const html  = quill.root.innerHTML;
+      const text  = quill.getText().trim();
+      const blank = html.trim() === '<p><br></p>';
+      if (!text || blank) {
+        e.preventDefault();
+        bodyError.style.display = 'block';
+        quill.focus();
+        return;
+      }
+      bodyError.style.display = 'none';
+      bodyTA.value = html;
+    });
+
+    quill.on('text-change', () => {
+      if (quill.getText().trim()) bodyError.style.display = 'none';
     });
   </script>
 </body>

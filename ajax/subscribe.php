@@ -1,15 +1,9 @@
 <?php
 require_once __DIR__ . '/../includes/db.php';
-header('Content-Type: application/json');
+require_once __DIR__ . '/../includes/mailer.php';
+require_once __DIR__ . '/../includes/emailTemplates.php';
 
-// Ensure the subscribers table exists
-$conn->query("
-CREATE TABLE IF NOT EXISTS subscribers (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
-");
+header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
@@ -27,6 +21,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->error) {
                 throw new Exception($stmt->error, $conn->errno);
             }
+
+            // ── Send welcome email ──────────────────────────────
+ try {
+    $htmlBody = welcomeEmailTemplate($email);
+    sendMail($email, 'Welcome to WakaAbout! 🌍', $htmlBody);
+} catch (\Throwable $mailErr) {
+    error_log('[Wakabout] Welcome email failed for ' . $email . ': ' . $mailErr->getMessage());
+}
+
             echo json_encode(['success' => true, 'message' => 'Thank you for subscribing!']);
         } else {
             echo json_encode(['success' => false, 'message' => 'Database error: ' . $conn->error]);

@@ -2,7 +2,8 @@ let body = document.querySelector("body");
 let modeBlk = document.getElementById("slider-ball");
 let cover_bg = document.querySelector(".cover-bg");
 let harm_btn = document.querySelector(".harm");
-let nav_bar = document.querySelector("header nav");
+let harm_block = document.querySelector(".harm-block");
+let nav_bar = document.querySelector("header");
 let nav_list = document.querySelectorAll(".nav-list a");
 let darkMode = localStorage.getItem("darkMode");
 let load_block = document.querySelector(".loader-block");
@@ -24,12 +25,14 @@ if (harm_btn && nav_bar && cover_bg) {
     nav_bar.classList.toggle("active");
     cover_bg.classList.toggle("active");
     harm_btn.classList.toggle("active");
+    // harm_block.classList.toggle("active");
   });
 
   cover_bg.addEventListener("click", () => {
     cover_bg.classList.remove("active");
     nav_bar.classList.remove("active");
     harm_btn.classList.remove("active");
+    // harm_block.classList.remove("active");
   });
 
   nav_list.forEach((nav_li) => {
@@ -44,6 +47,7 @@ if (harm_btn && nav_bar && cover_bg) {
     cover_bg.classList.remove("active");
     nav_bar.classList.remove("active");
     harm_btn.classList.remove("active");
+        // harm_block.classList.remove("active");
   };
 }
 

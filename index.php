@@ -1,6 +1,15 @@
 <?php
-
 require_once 'includes/db.php';
+
+// ── Extract first <img src> from post body HTML ─────────────
+function getFirstBodyImage(string $html): string
+{
+  if (empty($html)) return '';
+  if (preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $html, $m)) {
+    return $m[1];
+  }
+  return '';
+}
 
 // Fetch the Hero post
 $stmt = $conn->prepare("SELECT * FROM posts ORDER BY published_at DESC LIMIT 1");
@@ -14,7 +23,7 @@ if ($stmt) {
 // Fetch related posts (same category, exclude current) for sidebar
 $relatedPosts = [];
 if ($post) {
-  $relatedStmt = $conn->prepare("SELECT id, title, slug, cover_image, category FROM posts WHERE id != ? ORDER BY published_at DESC LIMIT 5");
+  $relatedStmt = $conn->prepare("SELECT id, title, slug, cover_image, category, body FROM posts WHERE id != ? ORDER BY published_at DESC LIMIT 5");
   if ($relatedStmt) {
     $relatedStmt->bind_param("i", $post['id']);
     $relatedStmt->execute();
@@ -23,7 +32,7 @@ if ($post) {
   }
 } else {
   // Fallback if no posts
-  $relatedStmt = $conn->prepare("SELECT id, title, slug, cover_image, category FROM posts ORDER BY published_at DESC LIMIT 5");
+  $relatedStmt = $conn->prepare("SELECT id, title, slug, cover_image, category, body FROM posts ORDER BY published_at DESC LIMIT 5");
   if ($relatedStmt) {
     $relatedStmt->execute();
     $result = $relatedStmt->get_result();
@@ -31,40 +40,57 @@ if ($post) {
   }
 }
 
-// Fetch Other Stories
-$storiesStmt = $conn->prepare("SELECT * FROM posts ORDER BY published_at DESC LIMIT 6");
+// Fetch Other Stories (exclude the hero post)
 $otherStories = [];
+$excludeId = $post['id'] ?? 0;
+$storiesStmt = $conn->prepare("SELECT id, title, slug, cover_image, excerpt, body, published_at FROM posts WHERE id != ? ORDER BY published_at DESC LIMIT 6");
 if ($storiesStmt) {
+  $storiesStmt->bind_param("i", $excludeId);
   $storiesStmt->execute();
-  $res = $storiesStmt->get_result();
-  $otherStories = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
+  $result = $storiesStmt->get_result();
+  $otherStories = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 }
 
-// select data for books
-$booksResult = $conn->query("SELECT * FROM books ORDER BY created_at DESC");
-$books = $booksResult ? $booksResult->fetch_all(MYSQLI_ASSOC) : [];
+// Fetch Latest Books
+$books = [];
+$booksStmt = $conn->prepare("SELECT id, title, description, cover_image, buy_link, price FROM books ORDER BY created_at DESC LIMIT 4");
+if ($booksStmt) {
+  $booksStmt->execute();
+  $result = $booksStmt->get_result();
+  $books = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+}
 
-// Select data for events
-$eventsResult = $conn->query("SELECT * FROM events ORDER BY created_at DESC LIMIT 3");
-$events = $eventsResult ? $eventsResult->fetch_all(MYSQLI_ASSOC) : [];
+// Fetch Upcoming Events
+$events = [];
+$eventsStmt = $conn->prepare("SELECT id, title, description, cover_image, event_date, location, cta_link, cta_label FROM events ORDER BY event_date ASC LIMIT 3");
+if ($eventsStmt) {
+  $eventsStmt->execute();
+  $result = $eventsStmt->get_result();
+  $events = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+}
 
-
-// Format date for hero post
-$publishedDate = $post && !empty($post['published_at']) ? date('F j, Y', strtotime($post['published_at'])) : '';
-
-$pageTitle = 'Home';
-require_once 'includes/header.php';
+// Format published date for hero
+$publishedDate = '';
+if ($post && !empty($post['published_at'])) {
+  $publishedDate = date('F j, Y', strtotime($post['published_at']));
+}
 ?>
-
-<main class="main">
-  <!-- HERO headline -->
+<body>
+<?php require_once 'includes/header.php'; ?>
+<!-- <div class="loader-block">
+  <span class="loader">Wakaabout Online...</span>
+</div> -->
+<main>
+  <!-- HERO SECTION -->
   <section class="hero-sector">
-    <div class="hero-block">
-      <?php if ($post): ?>
-        <?php if (!empty($post['cover_image'])): ?>
-          <img class="hero-img" src="<?= htmlspecialchars($post['cover_image']) ?>"
-            alt="<?= htmlspecialchars($post['title']) ?>">
-        <?php endif; ?>
+    <!-- <div class="hero-main"> -->
+    <?php if ($post): ?>
+      <?php
+      $heroImg = !empty($post['cover_image'])
+        ? $post['cover_image']
+        : getFirstBodyImage($post['body'] ?? '');
+      ?>
+      <div class="hero-block" <?php if ($heroImg): ?>style=" background-image:linear-gradient(to top, #000000, #000000e4, #00000000), url('<?= htmlspecialchars($heroImg) ?>')" <?php endif; ?>>
         <div class="hero-txt">
           <p class="hero-date"><?= $publishedDate ?></p>
           <a href="post.php?slug=<?= htmlspecialchars($post['slug'] ?? '') ?>" class="hero-title">
@@ -74,25 +100,30 @@ require_once 'includes/header.php';
             </p>
           </a>
         </div>
-      <?php else: ?>
+      </div>
+    <?php else: ?>
+      <div class="hero-block">
         <div class="hero-txt">
           <h2>Welcome to Wakabout</h2>
           <p>Check back later for exciting travel insights and updates!</p>
         </div>
-      <?php endif; ?>
-    </div>
+      </div>
+    <?php endif; ?>
+    <!-- </div> -->
 
     <!-- SIDEBAR headline sidebar -->
-    <aside class="hero-sidebar">
+    <div class="hero-sidebar">
       <h2>Recent Posts</h2>
       <div class="hero-sidebar-block">
         <?php foreach ($relatedPosts as $rPost): ?>
           <div class="hero-sidebar-li">
-            <?php if (!empty($rPost['cover_image'])): ?>
-              <img src="<?= htmlspecialchars($rPost['cover_image']) ?>" alt="<?= htmlspecialchars($rPost['title']) ?>" />
-            <?php else: ?>
-              <img src="assets/img/placeholder.png" alt="Placeholder" />
-            <?php endif; ?>
+            <?php
+            $rImg = !empty($rPost['cover_image'])
+              ? $rPost['cover_image']
+              : getFirstBodyImage($rPost['body'] ?? '');
+            $rImg = $rImg ?: 'assets/public/placeholder.jpg';
+            ?>
+            <img src="<?= htmlspecialchars($rImg) ?>" alt="<?= htmlspecialchars($rPost['title']) ?>" />
             <div class="hero-sidebar-links">
               <!-- <a class="categ" href="#"><?= htmlspecialchars($rPost['category'] ?? 'General') ?></a> -->
               <a class="link" href="post.php?slug=<?= htmlspecialchars($rPost['slug'] ?? '') ?>">
@@ -106,7 +137,7 @@ require_once 'includes/header.php';
         <?php endif; ?>
       </div>
       <a class="hero-sidebar-btn btn" href="blog.php">View More</a>
-    </aside>
+    </div>
   </section>
 
   <!-- lastest book -->
@@ -120,8 +151,9 @@ require_once 'includes/header.php';
       <?php if (!empty($books)): ?>
         <?php foreach ($books as $book): ?>
           <div class="book-card" style="background-image: url(<?= htmlspecialchars($book['cover_image']) ?>)">
-
+            <span class="book-category"><?= htmlspecialchars($book['category'] ?? 'General') ?></span>
             <div class="book-content">
+
               <h3><?= htmlspecialchars($book['title']) ?></h3>
               <p class="book-desc"><?= htmlspecialchars($book['description'] ?? '') ?></p>
               <?php
@@ -159,12 +191,12 @@ require_once 'includes/header.php';
 
               // Format event date/location
               $dateLabel = !empty($event['event_date']) ? '<b><svg class="event-icons" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 22" xmlns="http://www.w3.org/2000/svg">
- <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"></path>
-</svg></b><span>' . htmlspecialchars($event['event_date']) . '</span>' : '';
+              <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"></path>
+              </svg></b><span>' . htmlspecialchars($event['event_date']) . '</span>' : '';
               $locLabel = !empty($event['location']) ? '<b><svg class="event-icons" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 22" xmlns="http://www.w3.org/2000/svg">
- <path d="M12 2.25c-3.727 0-6.75 2.878-6.75 6.422 0 4.078 4.5 10.54 6.152 12.773a.739.739 0 0 0 1.196 0c1.652-2.231 6.152-8.692 6.152-12.773 0-3.544-3.023-6.422-6.75-6.422Z"></path>
- <path d="M12 11.25a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5Z"></path>
-</svg></b><span>' . htmlspecialchars($event['location']) . '</span>' : '';
+              <path d="M12 2.25c-3.727 0-6.75 2.878-6.75 6.422 0 4.078 4.5 10.54 6.152 12.773a.739.739 0 0 0 1.196 0c1.652-2.231 6.152-8.692 6.152-12.773 0-3.544-3.023-6.422-6.75-6.422Z"></path>
+              <path d="M12 11.25a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5Z"></path>
+              </svg></b><span>' . htmlspecialchars($event['location']) . '</span>' : '';
               ?>
               <div class="event-flex">
                 <?php if (!empty($dateLabel) || !empty($locLabel)): ?>
@@ -182,9 +214,19 @@ require_once 'includes/header.php';
           </div>
         <?php endforeach; ?>
       <?php else: ?>
-        <p style="grid-column: 1 / -1; text-align: center; font-size: 18px; padding: 40px 0; color: #888;">No upcoming
+        <p style="grid-column: 1 / -1; margin:auto; text-align: center; font-size: 18px; padding: 40px 0; color: #888;">No upcoming
           events at the moment. Check back later!</p>
       <?php endif; ?>
+    </div>
+  </section>
+
+  <!-- Featured youtube Video Section -->
+  <section class="video-sector">
+    <fieldset>
+      <legend>Featured Video</legend>
+    </fieldset>
+    <div class="video-block">
+      <iframe src="https://www.youtube.com/embed/ZgteqROJZ_E" title="Wakabout Featured Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
     </div>
   </section>
 
@@ -197,20 +239,22 @@ require_once 'includes/header.php';
     <div class="blog-block">
       <?php foreach ($otherStories as $story): ?>
         <div class="blog-list">
-          <?php if (!empty($story['cover_image'])): ?>
-            <img src="<?= htmlspecialchars($story['cover_image']) ?>" alt="<?= htmlspecialchars($story['title']) ?>" />
-          <?php else: ?>
-            <img src="assets/public/placeholder.jpg" alt="Story" />
-          <?php endif; ?>
+          <?php
+          $storyImg = !empty($story['cover_image'])
+            ? $story['cover_image']
+            : getFirstBodyImage($story['body'] ?? '');
+          ?>
+          <img src="<?= htmlspecialchars($storyImg ?: 'assets/public/placeholder.jpg') ?>" alt="<?= htmlspecialchars($story['title']) ?>" />
           <div class="blog-flex-top">
             <p class="date"><?= date('M d, Y', strtotime($story['published_at'])) ?></p>
             <!-- <p class="category"><?= htmlspecialchars($story['category'] ?? 'General') ?></p> -->
           </div>
           <h3 class="title"><?= htmlspecialchars($story['title']) ?></h3>
-          <p class="desc">
+          <!-- <p > -->
+          <a class="desc" href="post.php?slug=<?= htmlspecialchars($story['slug'] ?? '') ?>">
             <?= htmlspecialchars(mb_strimwidth($story['excerpt'] ?? strip_tags($story['body']), 0, 80, "...")) ?>
-            <a class="read-more" href="post.php?slug=<?= htmlspecialchars($story['slug'] ?? '') ?>">Read More</a>
-          </p>
+            <span class="read-more">Read More</span></a>
+          <!-- </p> -->
         </div>
       <?php endforeach; ?>
 
@@ -223,5 +267,13 @@ require_once 'includes/header.php';
   </section>
 
 </main>
+<!-- <script>
+document.body.style.overflow = 'hidden';
 
+setTimeout(() => {
+    document.querySelector('.loader-block').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}, 4000);
+</script> -->
+</body>
 <?php require_once 'includes/footer.php'; ?>

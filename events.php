@@ -1,5 +1,31 @@
 <?php
 require_once 'includes/db.php';
+
+// ── Active location filter ──────────────────────────────────
+$activeLocation = trim($_GET['location'] ?? 'All');
+
+// ── Fetch all distinct locations from events table ──────────
+$locResult = $conn->query("SELECT DISTINCT location FROM events WHERE location IS NOT NULL AND location != '' ORDER BY location ASC");
+$eventLocations = ['All'];
+if ($locResult) {
+    while ($row = $locResult->fetch_assoc()) {
+        $eventLocations[] = trim($row['location']);
+    }
+}
+
+// ── Fetch events (filter by location if set) ─────────────────
+if ($activeLocation !== 'All') {
+    $stmt = $conn->prepare("SELECT * FROM events WHERE location = ? ORDER BY created_at DESC");
+    if ($stmt) {
+        $stmt->bind_param("s", $activeLocation);
+        $stmt->execute();
+        $eventsResult = $stmt->get_result();
+    }
+} else {
+    $eventsResult = $conn->query("SELECT * FROM events ORDER BY created_at DESC");
+}
+$events = $eventsResult ? $eventsResult->fetch_all(MYSQLI_ASSOC) : [];
+
 $pageTitle = 'Tourist Events';
 $extraCss = 'pages.css';
 $pageDescription = 'Discover upcoming tourist events, festivals, and attractions across Nigeria.';
@@ -9,19 +35,42 @@ require_once 'includes/header.php';
       <section class="elephant-sector">
       <h2 class="elephant-title">Tour Events</h2>
       <div class="elephant-nav"
-        ><a href="index.html">Home</a> | <span>Events</span></div
+        ><a href="index.php">Home</a> | <span>Events</span></div
       >
     </section>
 
-<?php
-$eventsResult = $conn->query("SELECT * FROM events ORDER BY created_at DESC");
-$events = $eventsResult ? $eventsResult->fetch_all(MYSQLI_ASSOC) : [];
-?>
   <main class="event-main">
+
+    <!-- ── Location Filter Chips ── -->
+    <?php if (count($eventLocations) > 1): ?>
+    <div class="category-chips" style="margin-bottom: 28px;">
+      <?php foreach ($eventLocations as $loc): ?>
+        <a class="chip <?= ($activeLocation === $loc) ? 'active' : '' ?>"
+           href="events.php<?= $loc !== 'All' ? '?location=' . urlencode($loc) : '' ?>">
+          <?php if ($loc !== 'All'): ?>
+            <svg style="width:13px;height:13px;margin-right:4px;vertical-align:middle;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
+          <?php endif; ?>
+          <?= htmlspecialchars($loc) ?>
+        </a>
+      <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
+    <!-- ── Results count ── -->
+    <p class="filter-results-count">
+      <?php if ($activeLocation !== 'All'): ?>
+        Showing <strong><?= count($events) ?></strong> event<?= count($events) !== 1 ? 's' : '' ?> in
+        <strong><?= htmlspecialchars($activeLocation) ?></strong>
+        &mdash; <a href="events.php">View all</a>
+      <?php else: ?>
+        <strong><?= count($events) ?></strong> upcoming event<?= count($events) !== 1 ? 's' : '' ?>
+      <?php endif; ?>
+    </p>
+
     <div class="event-grid">
       <?php if (!empty($events)): ?>
         <?php foreach ($events as $event): ?>
-          <div class="event-card" >
+          <div class="event-card">
             <?php if (!empty($event['cover_image'])): ?>
               <img src="<?= htmlspecialchars($event['cover_image']) ?>" alt="<?= htmlspecialchars($event['title']) ?>" >
             <?php else: ?>
@@ -39,20 +88,27 @@ $events = $eventsResult ? $eventsResult->fetch_all(MYSQLI_ASSOC) : [];
                   <span ><?= $locLabel ?></span>
                 <?php endif; ?>
               </div>
-              <h3 class="title" "><?= htmlspecialchars($event['title']) ?></h3>
-              <p class="desc" "><?= htmlspecialchars($event['description'] ?? '') ?></p>
+              <h3 class="title"><?= htmlspecialchars($event['title']) ?></h3>
+              <p class="desc"><?= htmlspecialchars($event['description'] ?? '') ?></p>
               <?php
               $ctaLink = !empty($event['cta_link']) ? htmlspecialchars($event['cta_link']) : '#';
               $ctaLabel = !empty($event['cta_label']) ? htmlspecialchars($event['cta_label']) : 'Learn More';
               ?>
-              <a class="event-cta btn" href="<?= $ctaLink ?>" target="_blank" ><?= $ctaLabel ?></a>
+
             </div>
+              <a class="event-cta btn" href="<?= $ctaLink ?>" target="_blank"><?= $ctaLabel ?></a>            
           </div>
         <?php endforeach; ?>
       <?php else: ?>
-        <p style="grid-column: 1 / -1; text-align: center; font-size: 18px; padding: 40px 0; color: #888;">No upcoming events at the moment. Check back later!</p>
+        <div class="no-results" style="grid-column: 1 / -1;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+          <p><?= $activeLocation !== 'All' ? 'No events found in <strong>' . htmlspecialchars($activeLocation) . '</strong>.' : 'No upcoming events at the moment. Check back later!' ?></p>
+          <?php if ($activeLocation !== 'All'): ?>
+            <a class="chip active" href="events.php">Browse all events</a>
+          <?php endif; ?>
+        </div>
       <?php endif; ?>
     </div>
-      </main>
+  </main>
 
 <?php require_once 'includes/footer.php'; ?>
