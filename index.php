@@ -160,7 +160,7 @@ if ($post && !empty($post['published_at'])) {
               $buyLink = $book['buy_link'] ? htmlspecialchars($book['buy_link']) : '#';
               $priceLabel = $book['price'] ?  htmlspecialchars($book['price']) : '';
               ?>
-              <a class="book-btn btn" href="<?= $buyLink ?>" target="_blank">Buy Now $<?= $priceLabel ?></a>
+              <a class="book-btn btn" href="<?= $buyLink ?>" target="_blank">Buy Now  ₦<?= $priceLabel ?></a>
 
             </div>
 

@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             } else {
                 // Prevent email enumeration
-                $success = "If your email is in our system, you will receive a reset link shortly.";
+                $success = "Check your email" . htmlspecialchars($email) . "your reset link has been sent";
                 $isLocal = in_array($_SERVER['HTTP_HOST'], ['localhost', '127.0.0.1']) || strpos($_SERVER['HTTP_HOST'], '192.168.') === 0;
                 if ($isLocal) {
                     $success .= "<br><br><span style='color: #a3a3a3; font-size: 13px;'>Note: The email \"<b>" . htmlspecialchars($email) . "</b>\" does not exist in the database, so no reset link was generated.</span>";

@@ -852,13 +852,12 @@ fieldset legend {
     width: 95%;
     margin: 0% auto;
     gap: 30px;
-    padding-top: 15%;
+    padding-top: 14%;
   }
 
   .hero-txt {
     margin-bottom: 0;
   }
-
 
   .hero-date {
     font-size: 12px;

@@ -35,4 +35,4 @@ function resetPasswordEmailTemplate($resetLink) {
             <p style='font-size: 12px; color: #999999; text-align: center;'>&copy; 2026 WakaAbout. All rights reserved.</p>
         </div>
     ";
-}
+}

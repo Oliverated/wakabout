@@ -169,7 +169,7 @@ header .menu {
   width: 95%;
   height: 16vh;
   align-content: center;
-  z-index: 100;
+  z-index: 30;
   border-radius: 15px;
 }
 
@@ -194,11 +194,11 @@ header .menu {
   width: 65%;
 }
 
-.nav-logo2 {
+/* .nav-logo2 {
   width: 30%;
   padding-left: 3%;
   cursor: pointer;
-}
+} */
 
 .nav-list {
   display: flex;
@@ -500,13 +500,7 @@ footer {
   }
 
   /* nav bar */
-
-  header {
-    padding-bottom: 0;
-    width: 100%;
-  }
-
-  header .harm-block {
+header .harm-block {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -515,7 +509,7 @@ footer {
     right: 0px;
     top: 0;
     font-size: 30px;
-    z-index: 50;
+    z-index: 8;
     color: var(--accent);
     background-color: var(--secondary);
     width: 100%;
@@ -551,6 +545,11 @@ footer {
     left: 0vw;
   }
 
+header .menu {
+  background-color: var(--secondary);
+  height: 0;
+  }
+
   header {
     top: 0;
     height: 100vh;
@@ -560,6 +559,7 @@ footer {
     transition: 1000ms;
     left: -100vw;
     background-color: var(--secondary);
+    z-index: 12;
   }
 
   header.active {
@@ -572,6 +572,7 @@ footer {
 
   header .menu {
     margin-left: 5%;
+    margin-top: 10%;
   }
 
   .menu nav {
@@ -736,6 +737,15 @@ footer {
     font-size: 35px;
   }
 
+    header .harm-block {
+    height: 7vh;
+  }
+
+  .harm-block-logo{
+    width: 30%;
+  }
+
+
   /* nav bar */
   .nav-logo {
     display: flex;
@@ -746,7 +756,7 @@ footer {
   }
 
   .nav-logo img {
-    width: 60%;
+    width: 80%;
   }
 
   .nav-list {

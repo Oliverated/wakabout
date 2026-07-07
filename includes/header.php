@@ -29,7 +29,7 @@ require_once __DIR__ . '/session_config.php';
     <div class="menu">
       <div class="harm-block">
                 <a class="" href="./">
-        <img class="nav-logo2" src="assets/public/footerlogo.png" alt="Wakabout Logo" />
+        <img class="harm-block-logo" src="assets/public/footerlogo.png" alt="Wakabout Logo" />
         </a>
         <span class="harm">&#9776;</span>
       </div>
