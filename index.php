@@ -62,7 +62,7 @@ if ($booksStmt) {
 
 // Fetch Upcoming Events
 $events = [];
-$eventsStmt = $conn->prepare("SELECT id, title, description, cover_image, event_date, location, cta_link, cta_label FROM events ORDER BY event_date ASC LIMIT 3");
+$eventsStmt = $conn->prepare("SELECT id, title, description, cover_image, event_date, location, cta_link, cta_label FROM events ORDER BY event_date DESC LIMIT 3");
 if ($eventsStmt) {
   $eventsStmt->execute();
   $result = $eventsStmt->get_result();
@@ -77,9 +77,12 @@ if ($post && !empty($post['published_at'])) {
 ?>
 <body>
 <?php require_once 'includes/header.php'; ?>
-<!-- <div class="loader-block">
+<div class="loader-block">
+  <div class="loader-ctn" >
   <span class="loader">Wakaabout Online...</span>
-</div> -->
+  <span class="loader-masthead" >Nigeria's original travel voice <em class="since">since 2010.</em> </span>
+  </div>
+</div>
 <main>
   <!-- HERO SECTION -->
   <section class="hero-sector">
@@ -267,13 +270,13 @@ if ($post && !empty($post['published_at'])) {
   </section>
 
 </main>
-<!-- <script>
+ <!-- <script>
 document.body.style.overflow = 'hidden';
 
 setTimeout(() => {
     document.querySelector('.loader-block').classList.add('hidden');
     document.body.style.overflow = 'auto';
 }, 4000);
-</script> -->
+</script>  -->
 </body>
 <?php require_once 'includes/footer.php'; ?>

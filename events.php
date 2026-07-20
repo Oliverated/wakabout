@@ -35,7 +35,7 @@ require_once 'includes/header.php';
       <section class="elephant-sector">
       <h2 class="elephant-title">Tour Events</h2>
       <div class="elephant-nav"
-        ><a href="index.php">Home</a> | <span>Events</span></div
+        ><a href="index.php">Home</a> <b>|</b> <span>Events</span></div
       >
     </section>
 
