@@ -47,7 +47,7 @@ $events = $conn->query("SELECT * FROM events ORDER BY created_at DESC")->fetch_a
       <table class="dash-table">
         <thead>
           <tr>
-            <th>#</th><th>Cover</th><th>Title</th><th>Date</th><th>Location</th><th>Actions</th>
+            <th>#</th><th>Cover</th><th>Title</th><th>Category</th><th>Date</th><th>Location</th><th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -60,8 +60,28 @@ $events = $conn->query("SELECT * FROM events ORDER BY created_at DESC")->fetch_a
               <?php else: ?><span style="opacity:.4;">—</span><?php endif; ?>
             </td>
             <td><span class="post-title"><?= htmlspecialchars($event['title']) ?></span></td>
-            <td><?= htmlspecialchars($event['event_date'] ?: '—') ?></td>
-            <td><?= htmlspecialchars($event['location'] ?: '—') ?></td>
+            <td><span class="dash-badge" style="font-size:12px;padding:4px 8px;border-radius:6px;background:var(--border,#222);color:var(--text,#ddd);"><?= htmlspecialchars($event['category'] ?: 'General') ?></span></td>
+            <td>
+              <?php
+                $d = '';
+                if (!empty($event['start_date'])) {
+                    $d = date('M j, Y', strtotime($event['start_date']));
+                    if (!empty($event['end_date']) && $event['end_date'] !== $event['start_date']) {
+                        $d .= ' – ' . date('M j, Y', strtotime($event['end_date']));
+                    }
+                } elseif (!empty($event['event_date'])) {
+                    $d = $event['event_date'];
+                }
+                $dt = array_filter([$d, htmlspecialchars($event['event_time'] ?? '')]);
+                echo !empty($dt) ? implode(' &bull; ', $dt) : '—';
+              ?>
+            </td>
+            <td>
+              <?php
+                $locParts = array_filter([htmlspecialchars($event['city'] ?? ''), htmlspecialchars($event['location'] ?? '')]);
+                echo !empty($locParts) ? implode(' — ', $locParts) : '—';
+              ?>
+            </td>
             <td>
               <div class="dash-actions">
                 <a class="dash-btn dash-btn-edit" href="edit_event.php?id=<?= $event['id'] ?>">

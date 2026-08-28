@@ -27,7 +27,11 @@ if (!$event) {
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title       = trim($_POST['title']       ?? '');
-    $event_date  = trim($_POST['event_date']  ?? '');
+    $category    = trim($_POST['category']    ?? 'General');
+    $start_date  = trim($_POST['start_date']  ?? '') ?: null;
+    $end_date    = trim($_POST['end_date']    ?? '') ?: null;
+    $event_time  = trim($_POST['event_time']  ?? '');
+    $city        = trim($_POST['city']        ?? '');
     $location    = trim($_POST['location']    ?? '');
     $description = trim($_POST['description'] ?? '');
     $cta_label   = trim($_POST['cta_label']   ?? 'Learn More');
@@ -54,9 +58,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($error)) {
-        $stmt = $conn->prepare("UPDATE events SET title=?, event_date=?, location=?, description=?, cover_image=?, cta_label=?, cta_link=? WHERE id=?");
+        $stmt = $conn->prepare(
+            "UPDATE events SET title=?, category=?, start_date=?, end_date=?, event_time=?,
+             city=?, location=?, description=?, cover_image=?, cta_label=?, cta_link=? WHERE id=?"
+        );
         if ($stmt) {
-            $stmt->bind_param("sssssssi", $title, $event_date, $location, $description, $cover_image, $cta_label, $cta_link, $id);
+            $stmt->bind_param(
+                "sssssssssssi",
+                $title, $category, $start_date, $end_date, $event_time,
+                $city, $location, $description, $cover_image,
+                $cta_label, $cta_link, $id
+            );
             if ($stmt->execute()) {
                 $success = 'Event updated successfully! <a href="manage_events.php">View All Events</a>';
                 // Refresh data
@@ -72,6 +84,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } else {
             $error = 'Prepare failed: ' . $conn->error;
+        }
+    }
+}
+
+// Format stored start/end dates for date inputs
+$fmt_date = fn($d) => !empty($d) ? date('Y-m-d', strtotime($d)) : '';
+
+// Fetch categories for dropdown
+$categoriesResult = $conn->query("SELECT name FROM categories ORDER BY name ASC");
+$dbCategories = ['General', 'Festivals', 'Culture & Heritage', 'Music & Concerts', 'Exhibitions', 'Tours & Road Trips', 'Recreation'];
+if ($categoriesResult && $categoriesResult->num_rows > 0) {
+    while ($row = $categoriesResult->fetch_assoc()) {
+        if (!in_array($row['name'], $dbCategories)) {
+            $dbCategories[] = $row['name'];
         }
     }
 }
@@ -112,25 +138,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="POST" action="edit_event.php?id=<?= $id ?>" enctype="multipart/form-data" class="dash-form-container">
           <input type="hidden" name="id" value="<?= $id ?>">
 
-          <div class="dash-form-group">
-            <label for="title">Event Title *</label>
-            <input type="text" id="title" name="title" placeholder="Enter event title..." required
-                   value="<?= htmlspecialchars($event['title']) ?>">
+          <!-- Event Title & Category -->
+          <div class="dash-form-row">
+            <div class="dash-form-group" style="flex:2;">
+              <label for="title">Event Title *</label>
+              <input type="text" id="title" name="title" placeholder="Enter event title..." required
+                     value="<?= htmlspecialchars($event['title']) ?>">
+            </div>
+            <div class="dash-form-group" style="flex:1;">
+              <label for="category">Event Category</label>
+              <select id="category" name="category" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border,#333);background:var(--bg,#fff);color:var(--text,#111);">
+                <?php 
+                  $currentCat = $event['category'] ?? 'General';
+                  foreach ($dbCategories as $catOption): 
+                ?>
+                  <option value="<?= htmlspecialchars($catOption) ?>" <?= ($currentCat === $catOption) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($catOption) ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
           </div>
 
+          <!-- Start Date & End Date -->
           <div class="dash-form-row">
             <div class="dash-form-group">
-              <label for="event_date">Event Date</label>
-              <input type="text" id="event_date" name="event_date" placeholder="e.g. April 10–14, 2026"
-                     value="<?= htmlspecialchars($event['event_date'] ?? '') ?>">
+              <label for="start_date">Start Date</label>
+              <input type="date" id="start_date" name="start_date"
+                     value="<?= htmlspecialchars($fmt_date($event['start_date'] ?? '')) ?>">
             </div>
             <div class="dash-form-group">
-              <label for="location">Location</label>
-              <input type="text" id="location" name="location" placeholder="e.g. Calabar, Cross River"
+              <label for="end_date">End Date</label>
+              <input type="date" id="end_date" name="end_date"
+                     value="<?= htmlspecialchars($fmt_date($event['end_date'] ?? '')) ?>">
+            </div>
+          </div>
+
+          <!-- Time, City & Venue/Location -->
+          <div class="dash-form-row">
+            <div class="dash-form-group" style="flex:1;">
+              <label for="event_time">Time</label>
+              <input type="text" id="event_time" name="event_time" placeholder="e.g. 10:00 AM"
+                     value="<?= htmlspecialchars($event['event_time'] ?? '') ?>">
+            </div>
+            <div class="dash-form-group" style="flex:1;">
+              <label for="city">City</label>
+              <input type="text" id="city" name="city" placeholder="e.g. Lagos"
+                     value="<?= htmlspecialchars($event['city'] ?? '') ?>">
+            </div>
+            <div class="dash-form-group" style="flex:1;">
+              <label for="location">Venue / Location</label>
+              <input type="text" id="location" name="location" placeholder="e.g. Eko Hotel"
                      value="<?= htmlspecialchars($event['location'] ?? '') ?>">
             </div>
           </div>
 
+          <!-- Cover Image -->
           <div class="dash-form-group">
             <label for="cover_image">Cover Image</label>
             <?php if (!empty($event['cover_image'])): ?>
@@ -147,11 +210,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="file" id="cover_image" name="cover_image" accept="image/*">
           </div>
 
+          <!-- Description -->
           <div class="dash-form-group">
             <label for="description">Description</label>
-            <textarea id="description" name="description" rows="4" placeholder="Brief description of the event..."><?= htmlspecialchars($event['description'] ?? '') ?></textarea>
+            <textarea id="description" name="description" rows="5" placeholder="Brief description of the event..."><?= htmlspecialchars($event['description'] ?? '') ?></textarea>
           </div>
 
+          <!-- CTA Label + CTA Link -->
           <div class="dash-form-row">
             <div class="dash-form-group">
               <label for="cta_label">CTA Button Label</label>

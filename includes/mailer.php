@@ -16,7 +16,7 @@ $mail->Password   = 'Pelu@952';
 $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL
 $mail->Port       = 465;
 
-$mail->setFrom('paw@wakaabout.net', 'WakaAbout Blog');
+$mail->setFrom('paw@wakaabout.net', 'WakaAbout Online');
 $mail->addAddress($to);
 
         $mail->isHTML(true);

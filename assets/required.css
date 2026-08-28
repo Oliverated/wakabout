@@ -91,7 +91,7 @@ svg {
   --secondary: #000000;
   --accent: red;
   --accent-lit: #ff0c0c13;
-  --sec-lit: #00000010;
+  --sec-lit: #0000001b;
   --ff: "Inter", sans-serif;
   --ff-heading: "Outfit", sans-serif;
 }
@@ -207,7 +207,6 @@ header .menu {
   width: 20%;
   text-align: center;
   display: block;
-  display: inline-block;
 }
 
 .nav-logo img {
@@ -280,14 +279,20 @@ header .menu {
   font-size: 40px;
 }
 
+.elephant-nav{
+  font-size: 25px;
+  padding-left: 10px;
+
+}
+
 .elephant-sector a {
   color: var(--accent);
-  font-size: 25px;
+  font-size: 20px;
 }
 
 .elephant-sector span {
   color: var(--primary);
-  font-size: 25px;
+  font-size: 20px;
 }
 
 /* Footer Styles */

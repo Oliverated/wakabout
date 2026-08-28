@@ -45,7 +45,6 @@ require_once __DIR__ . '/session_config.php';
           <li><a href="blog.php">Blogs</a></li>
           <li><a href="books.php">Books</a></li>
           <li><a href="events.php">Events</a></li>
-          <li><a href="about.php">About</a></li>
           <li><a href="contact.php">Contact</a></li>
 
         </ul>

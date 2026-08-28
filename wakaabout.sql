@@ -42,7 +42,11 @@ INSERT INTO `categories` (`id`, `name`, `group_name`, `created_at`) VALUES
 CREATE TABLE `events` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `title` varchar(250) NOT NULL,
-  `event_date` varchar(100) DEFAULT NULL,
+  `category` varchar(150) DEFAULT 'General',
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `event_time` varchar(100) DEFAULT NULL,
+  `city` varchar(150) DEFAULT NULL,
   `location` varchar(200) DEFAULT NULL,
   `description` text DEFAULT NULL,
   `cover_image` varchar(250) DEFAULT NULL,
